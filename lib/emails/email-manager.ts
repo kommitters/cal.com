@@ -14,33 +14,37 @@ import TeamInviteEmail, { TeamInvite } from "@lib/emails/templates/team-invite-e
 import { CalendarEvent } from "@lib/integrations/calendar/interfaces/Calendar";
 
 export const sendScheduledEmails = async (calEvent: CalendarEvent) => {
-  const emailsToSend = [];
+  const eventDeadline = new Date(calEvent.endTime); //Asumes UTC as default
+  const currentDate = new Date(); // Uses localtime
 
-  emailsToSend.push(
-    calEvent.attendees.map((attendee) => {
-      return new Promise((resolve, reject) => {
+  if (eventDeadline.getTime() > currentDate.getTime()) {
+    const emailsToSend = [];
+    emailsToSend.push(
+      calEvent.attendees.map((attendee) => {
+        return new Promise((resolve, reject) => {
+          try {
+            const scheduledEmail = new AttendeeScheduledEmail(calEvent, attendee);
+            resolve(scheduledEmail.sendEmail());
+          } catch (e) {
+            reject(console.error("AttendeeRescheduledEmail.sendEmail failed", e));
+          }
+        });
+      })
+    );
+
+    emailsToSend.push(
+      new Promise((resolve, reject) => {
         try {
-          const scheduledEmail = new AttendeeScheduledEmail(calEvent, attendee);
+          const scheduledEmail = new OrganizerScheduledEmail(calEvent);
           resolve(scheduledEmail.sendEmail());
         } catch (e) {
-          reject(console.error("AttendeeRescheduledEmail.sendEmail failed", e));
+          reject(console.error("OrganizerScheduledEmail.sendEmail failed", e));
         }
-      });
-    })
-  );
+      })
+    );
 
-  emailsToSend.push(
-    new Promise((resolve, reject) => {
-      try {
-        const scheduledEmail = new OrganizerScheduledEmail(calEvent);
-        resolve(scheduledEmail.sendEmail());
-      } catch (e) {
-        reject(console.error("OrganizerScheduledEmail.sendEmail failed", e));
-      }
-    })
-  );
-
-  await Promise.all(emailsToSend);
+    await Promise.all(emailsToSend);
+  }
 };
 
 export const sendRescheduledEmails = async (calEvent: CalendarEvent) => {
