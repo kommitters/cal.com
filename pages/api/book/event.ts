@@ -459,6 +459,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const credentials = await refreshCredentials(user.credentials);
   const eventManager = new EventManager({ ...user, credentials });
 
+  const eventDeadline = new Date(evt.endTime);
+  const currentDate = new Date();
+
   if (rescheduleUid) {
     // Use EventManager to conditionally use all needed integrations.
     const updateManager = await eventManager.update(evt, rescheduleUid);
@@ -483,7 +486,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         metadata.entryPoints = results[0].updatedEvent?.entryPoints;
       }
 
-      await sendRescheduledEmails({ ...evt, additionInformation: metadata });
+      currentDate.getTime() > eventDeadline.getTime() &&
+        (await sendRescheduledEmails({ ...evt, additionInformation: metadata }));
     }
     // If it's not a reschedule, doesn't require confirmation and there's no price,
     // Create a booking
@@ -510,12 +514,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         metadata.conferenceData = results[0].createdEvent?.conferenceData;
         metadata.entryPoints = results[0].createdEvent?.entryPoints;
       }
-      await sendScheduledEmails({ ...evt, additionInformation: metadata });
+      currentDate.getTime() > eventDeadline.getTime() &&
+        (await sendScheduledEmails({ ...evt, additionInformation: metadata }));
     }
   }
 
   if (eventType.requiresConfirmation && !rescheduleUid) {
-    await sendOrganizerRequestEmail(evt);
+    currentDate.getTime() > eventDeadline.getTime() && (await sendOrganizerRequestEmail(evt));
   }
 
   if (typeof eventType.price === "number" && eventType.price > 0) {
