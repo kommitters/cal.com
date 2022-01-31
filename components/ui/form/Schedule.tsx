@@ -47,11 +47,9 @@ type TimeRangeFieldProps = {
 
 let initialValueforSelectStart: Option;
 
-// const { i18n } = useLocale();
 const getOption = (time: ConfigType) => ({
   value: dayjs(time).toDate().valueOf(),
   label: dayjs(time).utc().format("HH:mm"),
-  // .toLocaleTimeString(i18n.language, { minute: "numeric", hour: "numeric" }),
 });
 
 const TimeRangeField = ({ name }: TimeRangeFieldProps) => {
@@ -72,21 +70,23 @@ const TimeRangeField = ({ name }: TimeRangeFieldProps) => {
     setValueSelectStart(option);
   };
 
-  const calculateTimeRange = (value: Option) => {
+  const isInTimeRange = (value: Option) => {
     const earlyMorningHours = [{ open: "00:00", close: "04:45" }];
-    let opened = false;
+
     earlyMorningHours.forEach((item) => {
       const open = new Date("1/1/1999 " + item.open);
       const close = new Date("1/1/1999 " + item.close);
       const hourDate = new Date(`1/1/1999 ${value.label}`);
-      opened = opened || (hourDate >= open && close >= hourDate);
+      if (hourDate >= open && close >= hourDate) {
+        return true;
+      }
     });
-    return opened;
+    return false;
   };
 
   const calculateValue = (value: Option) => {
-    if (calculateTimeRange(value)) {
-      return calculateTimeRange(valueSelectStart) && value.value < valueSelectStart.value
+    if (isInTimeRange(value)) {
+      return isInTimeRange(valueSelectStart) && value.value < valueSelectStart.value
         ? valueSelectStart
         : value;
     }
