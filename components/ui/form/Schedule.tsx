@@ -73,14 +73,14 @@ const TimeRangeField = ({ name }: TimeRangeFieldProps) => {
   const isInTimeRange = (value: Option) => {
     const earlyMorningHours = [{ open: "00:00", close: "04:45" }];
 
-    earlyMorningHours.forEach((item) => {
-      const open = new Date("1/1/1999 " + item.open);
-      const close = new Date("1/1/1999 " + item.close);
+    for (let i = 0; i < earlyMorningHours.length; i++) {
+      const open = new Date("1/1/1999 " + earlyMorningHours[i].open);
+      const close = new Date("1/1/1999 " + earlyMorningHours[i].close);
       const hourDate = new Date(`1/1/1999 ${value.label}`);
       if (hourDate >= open && close >= hourDate) {
         return true;
       }
-    });
+    }
     return false;
   };
 
