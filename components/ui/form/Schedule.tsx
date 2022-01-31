@@ -65,14 +65,14 @@ const TimeRangeField = ({ name }: TimeRangeFieldProps) => {
     );
   }, []);
 
-  const [valueSelectStart, setValueStart] = useState<Option>(initialValueforSelectStart);
+  const [valueSelectStart, setValueSelectStart] = useState<Option>(initialValueforSelectStart);
 
-  const customOnChange = (onChange: any, option: any) => {
+  const createDateAndModifyNewValue = (onChange: any, option: any) => {
     onChange(new Date(option?.value as number));
-    setValueStart(option);
+    setValueSelectStart(option);
   };
 
-  const calculateRange = (value: Option) => {
+  const calculateTimeRange = (value: Option) => {
     const earlyMorningHours = [{ open: "00:00", close: "04:45" }];
     let opened = false;
     earlyMorningHours.forEach((item) => {
@@ -85,19 +85,12 @@ const TimeRangeField = ({ name }: TimeRangeFieldProps) => {
   };
 
   const calculateValue = (value: Option) => {
-    if (calculateRange(value)) {
-      if (calculateRange(valueSelectStart)) {
-        if (value.value < valueSelectStart.value) {
-          return valueSelectStart;
-        }
-      }
-      return value;
+    if (calculateTimeRange(value)) {
+      return calculateTimeRange(valueSelectStart) && value.value < valueSelectStart.value
+        ? valueSelectStart
+        : value;
     }
-
-    if (value.value < valueSelectStart.value) {
-      return valueSelectStart;
-    }
-    return value;
+    return value.value < valueSelectStart.value ? valueSelectStart : value;
   };
 
   return (
@@ -111,7 +104,7 @@ const TimeRangeField = ({ name }: TimeRangeFieldProps) => {
             onFocus={() => setOptions(timeOptions())}
             onBlur={() => setOptions([])}
             defaultValue={getOption(value)}
-            onChange={(option) => customOnChange(onChange, option)}
+            onChange={(option) => createDateAndModifyNewValue(onChange, option)}
           />
         )}
       />
