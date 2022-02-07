@@ -653,6 +653,12 @@ const EventTypePage = (props: inferSSRProps<typeof getServerSideProps>) => {
                           required
                           className="flex-1 block w-full min-w-0 border-gray-300 rounded-none rounded-r-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                           defaultValue={eventType.slug}
+                          onKeyUp={(event) => {
+                            const newValueWithoutSpace = String(event.target.value).replace(/\s+/g, "-");
+                            const newValueWithoutSlash = newValueWithoutSpace.replace(/\//g, "");
+                            const newValueWithoutBackSlash = newValueWithoutSlash.replace(/\\/g, "");
+                            formMethods.setValue("slug", newValueWithoutBackSlash.toLowerCase());
+                          }}
                           {...formMethods.register("slug")}
                         />
                       </div>

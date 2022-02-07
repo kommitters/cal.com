@@ -66,8 +66,14 @@ export default function CreateEventTypeButton(props: Props) {
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
       if (name === "title" && type === "change") {
-        if (value.title) setValue("slug", value.title.replace(/\s+/g, "-").toLowerCase());
-        else setValue("slug", "");
+        if (value.title) {
+          const newValueWithoutSpace = value.title.replace(/\s+/g, "-");
+          const newValueWithoutSlash = newValueWithoutSpace.replace(/\//g, "");
+          const newValueWithoutBackSlash = newValueWithoutSlash.replace(/\\/g, "");
+          setValue("slug", newValueWithoutBackSlash.toLowerCase());
+        } else {
+          setValue("slug", "");
+        }
       }
     });
     return () => subscription.unsubscribe();
@@ -227,7 +233,7 @@ export default function CreateEventTypeButton(props: Props) {
                 <RadioArea.Group
                   {...register("schedulingType")}
                   onChange={(val) => form.setValue("schedulingType", val as SchedulingType)}
-                  className="relative flex mt-1 rtl:space-x-reverse space-x-6 rounded-sm shadow-sm">
+                  className="relative flex mt-1 space-x-6 rounded-sm shadow-sm rtl:space-x-reverse">
                   <RadioArea.Item value={SchedulingType.COLLECTIVE} className="w-1/2 text-sm">
                     <strong className="block mb-1">{t("collective")}</strong>
                     <p>{t("collective_description")}</p>
