@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import { Trans } from "next-i18next";
 import { useRouter } from "next/router";
 import { ComponentProps, FormEvent, RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { HexColorInput, HexColorPicker } from "react-colorful";
 import Select from "react-select";
 import TimezoneSelect, { ITimezone } from "react-timezone-select";
 
@@ -151,8 +152,8 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
   const emailRef = useRef<HTMLInputElement>(null!);
   const descriptionRef = useRef<HTMLTextAreaElement>(null!);
   const avatarRef = useRef<HTMLInputElement>(null!);
-  const brandColorRef = useRef<HTMLInputElement>(null!);
   const hideBrandingRef = useRef<HTMLInputElement>(null!);
+  const [brandColor, setBrandColor] = useState<string>(props.user.brandColor);
   const [selectedTheme, setSelectedTheme] = useState<typeof themeOptions[number] | undefined>();
   const [selectedTimeZone, setSelectedTimeZone] = useState<ITimezone>(props.user.timeZone);
   const [selectedWeekStartDay, setSelectedWeekStartDay] = useState({
@@ -184,7 +185,6 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
     const enteredEmail = emailRef.current.value;
     const enteredDescription = descriptionRef.current.value;
     const enteredAvatar = avatarRef.current.value;
-    const enteredBrandColor = brandColorRef.current.value;
     const enteredTimeZone = typeof selectedTimeZone === "string" ? selectedTimeZone : selectedTimeZone.value;
     const enteredWeekStartDay = selectedWeekStartDay.value;
     const enteredHideBranding = hideBrandingRef.current.checked;
@@ -202,7 +202,7 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
       weekStart: asStringOrUndefined(enteredWeekStartDay),
       hideBranding: enteredHideBranding,
       theme: asStringOrNull(selectedTheme?.value),
-      brandColor: enteredBrandColor,
+      brandColor,
       locale: enteredLanguage,
     });
   }
@@ -402,16 +402,19 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
               <label htmlFor="brandColor" className="block text-sm font-medium text-gray-700">
                 {t("brand_color")}
               </label>
-              <div className="flex mt-1">
-                <input
-                  ref={brandColorRef}
-                  type="text"
-                  name="brandColor"
-                  id="brandColor"
-                  placeholder="#hex-code"
-                  className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-neutral-800 focus:border-neutral-800 sm:text-sm"
-                  defaultValue={props.user.brandColor}
-                />
+              <div className="mt-1">
+                <div className="flex items-stretch mt-1 space-x-2">
+                  <div className="w-10 h-10 rounded-sm" style={{ backgroundColor: brandColor }} />
+                  <HexColorInput
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-neutral-800 focus:border-neutral-800 sm:text-sm"
+                    name="brandColor"
+                    id="brandColor"
+                    color={brandColor}
+                    onChange={setBrandColor}
+                    prefixed
+                  />
+                </div>
+                <HexColorPicker className="mt-2" color={brandColor} onChange={setBrandColor} />
               </div>
               <hr className="mt-6" />
             </div>
