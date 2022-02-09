@@ -26,8 +26,12 @@ export default function TeamSettingsRightSidebar(props: { team: TeamWithMembers;
 
   const deleteTeamMutation = trpc.useMutation("viewer.teams.delete", {
     async onSuccess() {
-      await utils.invalidateQueries(["viewer.teams.get"]);
+      await utils.invalidateQueries(["viewer.teams.list"]);
+      await router.push("/settings/teams");
       showToast(t("your_team_updated_successfully"), "success");
+    },
+    onError: (err) => {
+      showToast(err.message, "error");
     },
   });
   const acceptOrLeaveMutation = trpc.useMutation("viewer.teams.acceptOrLeave", {
@@ -81,6 +85,7 @@ export default function TeamSettingsRightSidebar(props: { team: TeamWithMembers;
           <Dialog>
             <DialogTrigger asChild>
               <LinkIconButton
+                data-testid="disband-team"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}

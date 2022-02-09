@@ -61,6 +61,7 @@ export default function Teams() {
           <Button
             disabled={isFreePlan}
             type="button"
+            data-testid="new-team"
             className="btn btn-white"
             onClick={() => setShowCreateTeamModal(true)}>
             <PlusIcon className="group-hover:text-black text-gray-700 w-3.5 h-3.5 mr-2 inline-block" />
